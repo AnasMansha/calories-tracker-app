@@ -1,7 +1,5 @@
 # Calories
 
-![Calories Tracker](https://github.com/AnasMansha/calories-tracker-app/blob/main/assets/android-icon-foreground.png)
-
 A simple calorie tracker built with Expo. Log meals by day, watch progress against your daily goal, and review history and stats — all offline on device.
 
 ## Features
