@@ -62,3 +62,6 @@ coverage/
 # agent / local tooling
 .claude/
 agent-tools/
+
+# plans
+plan.md

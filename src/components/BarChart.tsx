@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../theme/ThemeProvider';
-import { formatCalories } from '../utils/calories';
+import { formatMetric } from '../utils/insights';
 import type { ChartPoint } from '../utils/stats';
 import { statusPalette } from './StatusPill';
 import { AppText } from './ui/AppText';
@@ -11,10 +11,13 @@ const PLOT_HEIGHT = 160;
 interface BarChartProps {
   points: ChartPoint[];
   compact?: boolean;
+  unitLabel?: string;
+  accentColor?: string;
 }
 
-export function BarChart({ points, compact = false }: BarChartProps) {
+export function BarChart({ points, compact = false, unitLabel = 'kcal', accentColor }: BarChartProps) {
   const theme = useTheme();
+  const lineColor = accentColor ?? theme.colors.textSubtle;
   const maxValue = Math.max(
     1,
     ...points.map((point) => Math.max(point.consumed, point.target)),
@@ -24,12 +27,12 @@ export function BarChart({ points, compact = false }: BarChartProps) {
   const targetTop = Math.max(0, PLOT_HEIGHT - (averageTarget / maxValue) * PLOT_HEIGHT);
 
   return (
-    <View accessibilityRole="image" accessibilityLabel="Calorie chart for the selected period">
+    <View accessibilityRole="image" accessibilityLabel={`Chart for the selected period, ${unitLabel}`}>
       <View style={[styles.plot, { height: PLOT_HEIGHT }]}>
         {averageTarget > 0 ? (
           <View
             pointerEvents="none"
-            style={[styles.targetLine, { top: targetTop, borderColor: theme.colors.textSubtle }]}
+            style={[styles.targetLine, { top: targetTop, borderColor: lineColor }]}
           />
         ) : null}
         {points.map((point) => {
@@ -80,7 +83,7 @@ export function BarChart({ points, compact = false }: BarChartProps) {
         <LegendSwatch color={theme.colors.danger} label="Over" />
       </View>
       <AppText variant="caption" color={theme.colors.textSubtle} align="center">
-        Target reference {formatCalories(averageTarget)} kcal
+        Target reference {formatMetric(averageTarget, unitLabel)}
       </AppText>
     </View>
   );

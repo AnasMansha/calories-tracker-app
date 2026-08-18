@@ -2,16 +2,15 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StyleSheet, View } from 'react-native';
 
-import { CalorieRing } from '../components/CalorieRing';
+import { DayGoals } from '../components/DayGoals';
 import { MealSectionList } from '../components/MealSectionList';
-import { StatusPill } from '../components/StatusPill';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { IconButton } from '../components/ui/IconButton';
 import { Screen } from '../components/ui/Screen';
 import { AppText } from '../components/ui/AppText';
 import type { RootStackParamList } from '../navigation/types';
-import { useAppStore, useDaySummary, useEntriesForDate } from '../store/useAppStore';
+import { useEntriesForDate } from '../store/useAppStore';
 import { useTheme } from '../theme/ThemeProvider';
 import { formatDisplayDate, isToday } from '../utils/dates';
 
@@ -20,9 +19,7 @@ export function DayDetailScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'DayDetail'>>();
   const { date } = route.params;
-  const summary = useDaySummary(date);
   const entries = useEntriesForDate(date);
-  const targetName = useAppStore((state) => state.settings.targetName);
 
   return (
     <Screen
@@ -51,10 +48,7 @@ export function DayDetailScreen() {
         <View style={styles.side} />
       </View>
 
-      <View style={styles.hero}>
-        <CalorieRing summary={summary} targetName={targetName} size={200} />
-        <StatusPill summary={summary} />
-      </View>
+      <DayGoals date={date} ringSize={200} caption="Calories" />
 
       <View style={styles.meals}>
         <AppText variant="subtitle">Meals</AppText>
@@ -83,11 +77,6 @@ const styles = StyleSheet.create({
   },
   side: {
     width: 44,
-  },
-  hero: {
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 28,
   },
   meals: {
     gap: 16,

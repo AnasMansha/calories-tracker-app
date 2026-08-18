@@ -40,11 +40,13 @@ export function RangePills<T extends string>({
             accessibilityRole="tab"
             accessibilityState={{ selected }}
             accessibilityLabel={option.label}
-            style={[
+            style={({ pressed }) => [
               styles.pill,
               {
                 backgroundColor: selected ? theme.colors.accent : theme.colors.surface,
                 borderColor: selected ? theme.colors.accent : theme.colors.border,
+                opacity: pressed ? 0.88 : 1,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
               },
             ]}
           >

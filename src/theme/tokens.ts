@@ -81,6 +81,8 @@ export const lightColors = {
   overlay: 'rgba(27, 26, 23, 0.4)',
   tabBar: '#FFFcf7',
   ringTrack: '#E4DFD6',
+  water: '#3D7EA6',
+  waterSoft: '#D4E6F0',
 };
 
 export const darkColors = {
@@ -104,6 +106,8 @@ export const darkColors = {
   overlay: 'rgba(0, 0, 0, 0.55)',
   tabBar: '#1C1B19',
   ringTrack: '#2C2A26',
+  water: '#7EB6D4',
+  waterSoft: '#1C2C36',
 };
 
 export type ThemeColors = typeof lightColors;

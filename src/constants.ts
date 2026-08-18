@@ -8,6 +8,8 @@ export const MAX_CALORIE_TARGET = 20000;
 export const MAX_FOOD_CALORIES = 20000;
 export const MAX_FOOD_NAME_LENGTH = 80;
 export const MAX_NOTES_LENGTH = 240;
+export const DEFAULT_PROTEIN_TARGET = 120;
+export const DEFAULT_WATER_GOAL_ML = 2000;
 
 export const WARNING_THRESHOLD = 0.8;
 

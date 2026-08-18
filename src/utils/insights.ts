@@ -1,6 +1,7 @@
+import type { DaySummary } from '../types';
 import { formatCalories } from './calories';
 import { formatMonthDay, formatWeekday } from './dates';
-import type { DaySummary } from '../types';
+import { formatAmount } from './nutrients';
 
 export interface InsightItem {
   id: 'average' | 'within' | 'highest' | 'lowest';
@@ -21,11 +22,18 @@ export interface RangeInsights {
   items: InsightItem[];
 }
 
-export function buildInsights(days: DaySummary[]): RangeInsights {
+export function formatMetric(value: number, unit: string): string {
+  if (unit === 'kcal') {
+    return `${formatCalories(value)} kcal`;
+  }
+  return `${formatAmount(value)} ${unit}`;
+}
+
+export function buildInsights(days: DaySummary[], unit = 'kcal'): RangeInsights {
   const dayCount = days.length;
   const logged = days.filter((day) => day.entryCount > 0);
-  const totalCalories = days.reduce((sum, day) => sum + day.consumed, 0);
-  const averageDaily = dayCount === 0 ? 0 : totalCalories / dayCount;
+  const total = days.reduce((sum, day) => sum + day.consumed, 0);
+  const averageDaily = dayCount === 0 ? 0 : total / dayCount;
   const averageRemaining =
     dayCount === 0 ? 0 : days.reduce((sum, day) => sum + day.remaining, 0) / dayCount;
   const daysWithinTarget = days.filter((day) => day.consumed <= day.target).length;
@@ -42,14 +50,14 @@ export function buildInsights(days: DaySummary[]): RangeInsights {
     {
       id: 'average',
       label: 'Average this period',
-      value: `${formatCalories(averageDaily)} kcal/day`,
+      value: `${formatMetric(averageDaily, unit)}/day`,
       detail: dayCount === 1 ? 'Across 1 tracked day' : `Across ${dayCount} tracked days`,
     },
     {
       id: 'within',
       label: 'Within target',
       value: `${daysWithinTarget} of ${dayCount} days`,
-      detail: logged.length === 0 ? 'No meals logged yet' : `${logged.length} days with meals logged`,
+      detail: logged.length === 0 ? 'Nothing logged yet' : `${logged.length} days with logs`,
     },
   ];
 
@@ -57,7 +65,7 @@ export function buildInsights(days: DaySummary[]): RangeInsights {
     items.push({
       id: 'highest',
       label: 'Highest day',
-      value: `${formatCalories(highest.consumed)} kcal`,
+      value: formatMetric(highest.consumed, unit),
       detail: `${formatWeekday(highest.date)}, ${formatMonthDay(highest.date)}`,
     });
   }
@@ -65,14 +73,14 @@ export function buildInsights(days: DaySummary[]): RangeInsights {
     items.push({
       id: 'lowest',
       label: 'Lowest day',
-      value: `${formatCalories(lowest.consumed)} kcal`,
+      value: formatMetric(lowest.consumed, unit),
       detail: `${formatWeekday(lowest.date)}, ${formatMonthDay(lowest.date)}`,
     });
   }
 
   return {
     averageDaily,
-    totalCalories,
+    totalCalories: total,
     averageRemaining,
     daysWithinTarget,
     dayCount,

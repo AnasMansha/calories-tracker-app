@@ -2,7 +2,7 @@ import type { ExportPayload, FoodEntry, MealCategory, Settings } from '../types'
 import { isValidDateKey } from './dates';
 
 export function toCsv(entries: FoodEntry[]): string {
-  const header = 'date,time,food,calories,meal,notes';
+  const header = 'date,time,food,calories,protein,carbs,meal,notes';
   const rows = [...entries]
     .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time))
     .map((entry) =>
@@ -11,6 +11,8 @@ export function toCsv(entries: FoodEntry[]): string {
         entry.time,
         csvEscape(entry.name),
         String(entry.calories),
+        entry.nutrients?.protein ? String(entry.nutrients.protein) : '',
+        entry.nutrients?.carbs ? String(entry.nutrients.carbs) : '',
         entry.meal ?? '',
         csvEscape(entry.notes),
       ].join(','),
@@ -23,6 +25,10 @@ export function toJsonBackup(payload: Omit<ExportPayload, 'version' | 'exportedA
     version: 1,
     exportedAt: new Date().toISOString(),
     ...payload,
+    nutrientTargets: payload.nutrientTargets ?? [],
+    waterTargets: payload.waterTargets ?? [],
+    waterLogs: payload.waterLogs ?? [],
+    savedFoods: payload.savedFoods ?? [],
   };
   return JSON.stringify(body, null, 2);
 }
@@ -38,7 +44,14 @@ export function parseImportedJson(text: string): ExportPayload {
     exportedAt: parsed.exportedAt ?? new Date().toISOString(),
     settings: parsed.settings,
     targets: Array.isArray(parsed.targets) ? parsed.targets : [],
-    entries: parsed.entries,
+    nutrientTargets: Array.isArray(parsed.nutrientTargets) ? parsed.nutrientTargets : [],
+    waterTargets: Array.isArray(parsed.waterTargets) ? parsed.waterTargets : [],
+    entries: parsed.entries.map((entry) => ({
+      ...entry,
+      nutrients: entry.nutrients ?? {},
+    })),
+    waterLogs: Array.isArray(parsed.waterLogs) ? parsed.waterLogs : [],
+    savedFoods: Array.isArray(parsed.savedFoods) ? parsed.savedFoods : [],
   };
 }
 
@@ -56,6 +69,9 @@ export function parseImportedCsv(text: string): Array<Omit<FoodEntry, 'id' | 'cr
   const timeIndex = header.indexOf('time');
   const notesIndex = header.indexOf('notes');
 
+  const proteinIndex = header.indexOf('protein');
+  const carbsIndex = header.indexOf('carbs');
+
   if (dateIndex < 0 || foodIndex < 0 || caloriesIndex < 0) {
     throw new Error('CSV must include date, food, and calories columns.');
   }
@@ -69,6 +85,16 @@ export function parseImportedCsv(text: string): Array<Omit<FoodEntry, 'id' | 'cr
       throw new Error(`Row ${index + 2} is invalid.`);
     }
 
+    const nutrients: FoodEntry['nutrients'] = {};
+    const protein = Number(columns[proteinIndex]);
+    const carbs = Number(columns[carbsIndex]);
+    if (proteinIndex >= 0 && Number.isFinite(protein) && protein > 0) {
+      nutrients.protein = protein;
+    }
+    if (carbsIndex >= 0 && Number.isFinite(carbs) && carbs > 0) {
+      nutrients.carbs = carbs;
+    }
+
     return {
       date,
       time: normalizeImportedTime(columns[timeIndex]),
@@ -76,6 +102,7 @@ export function parseImportedCsv(text: string): Array<Omit<FoodEntry, 'id' | 'cr
       calories: Math.round(calories),
       meal: normalizeImportedMeal(columns[mealIndex]),
       notes: columns[notesIndex]?.trim() ?? '',
+      nutrients,
     };
   });
 }

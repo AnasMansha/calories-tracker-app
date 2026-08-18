@@ -33,6 +33,7 @@ export function FoodEntryRow({ entry, onPress }: FoodEntryRowProps) {
         </AppText>
         <AppText variant="caption" color={theme.colors.textMuted}>
           {formatDisplayTime(entry.time)}
+          {entry.nutrients?.protein ? `  ·  ${entry.nutrients.protein}g protein` : ''}
           {entry.notes ? `  ·  ${entry.notes}` : ''}
         </AppText>
       </View>
